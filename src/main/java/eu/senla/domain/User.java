@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "user_id_seq")
     @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 10)

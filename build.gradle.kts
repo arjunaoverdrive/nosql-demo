@@ -23,6 +23,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("io.lettuce:lettuce-core")
+
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
