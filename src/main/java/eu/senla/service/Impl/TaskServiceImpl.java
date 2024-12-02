@@ -54,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
     public Task updateTask(Task task) {
         Task fromDb = findById(task.getId());
         BeanUtils.copyNonNullValues(task, fromDb);
-        return taskRepository.save(task);
+        return taskRepository.save(fromDb);
     }
 
     @Override
