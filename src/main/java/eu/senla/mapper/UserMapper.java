@@ -1,6 +1,7 @@
 package eu.senla.mapper;
 
 import eu.senla.domain.User;
+import eu.senla.model.UserModel;
 import eu.senla.web.dto.request.UserRequest;
 import eu.senla.web.dto.response.UserListResponse;
 import eu.senla.web.dto.response.UserResponse;
@@ -24,4 +25,6 @@ public interface UserMapper {
         user.setId(id);
         return user;
     }
+
+    UserModel toModel (User user);
 }

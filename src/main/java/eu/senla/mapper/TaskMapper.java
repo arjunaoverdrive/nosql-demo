@@ -1,6 +1,7 @@
 package eu.senla.mapper;
 
 import eu.senla.domain.Task;
+import eu.senla.model.TaskModel;
 import eu.senla.web.dto.request.AddObserversRequest;
 import eu.senla.web.dto.request.TaskSubmitRequest;
 import eu.senla.web.dto.request.TaskUpdateRequest;
@@ -11,7 +12,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = UserMapper.class)
 @DecoratedWith(TaskMapperDelegate.class)
 public interface TaskMapper {
     TaskResponse toTaskResponse(Task task);
@@ -35,4 +36,6 @@ public interface TaskMapper {
         task.setId(id);
         return task;
     }
+
+    TaskModel toModel(Task task);
 }
