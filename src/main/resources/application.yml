@@ -45,3 +45,6 @@ app:
         expiry: 5m
       userById:
         expiry: 5m
+
+  pubsub:
+    topic: "nosql:pubsub"

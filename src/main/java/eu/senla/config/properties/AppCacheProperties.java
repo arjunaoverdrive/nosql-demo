@@ -18,7 +18,7 @@ public class AppCacheProperties {
 
     @Data
     public static class CacheProperties {
-        private Duration expiry = Duration.ZERO;
+        private Duration expiry;
     }
 
     public interface CacheNames{

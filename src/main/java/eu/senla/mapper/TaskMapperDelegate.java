@@ -36,6 +36,7 @@ public abstract class TaskMapperDelegate implements TaskMapper {
                 .description(request.getDescription())
                 .status(request.getStatus())
                 .assignee(assignee)
+                .observers(null)
                 .build();
     }
     @Override

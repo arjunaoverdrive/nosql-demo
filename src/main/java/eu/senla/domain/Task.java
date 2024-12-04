@@ -1,5 +1,7 @@
 package eu.senla.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -51,15 +53,21 @@ public class Task implements Serializable {
     @ColumnDefault(value = "TODO")
     @Builder.Default
     TaskStatus status = TaskStatus.TODO;
+
     @ManyToOne
     @JoinColumn(name = "author_id")
+//    @JsonManagedReference
     User author;
+
     @ManyToOne
     @JoinColumn(name = "assignee_id")
+//    @JsonManagedReference
     User assignee;
+
     @ManyToMany(mappedBy = "observedTasks", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @Builder.Default
+//    @JsonBackReference
     Set<User> observers = new HashSet<>();
 }

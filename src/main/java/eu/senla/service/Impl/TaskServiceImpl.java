@@ -5,6 +5,7 @@ import eu.senla.dao.TaskRepository;
 import eu.senla.domain.Task;
 import eu.senla.domain.User;
 import eu.senla.exception.NotFoundException;
+import eu.senla.service.PublishingService;
 import eu.senla.service.TaskService;
 import eu.senla.service.UserService;
 import eu.senla.utils.BeanUtils;
@@ -29,6 +30,7 @@ import java.util.List;
 public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
     UserService userService;
+    PublishingService publishingService;
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, key = "#pageable.pageNumber + '_' + #pageable.pageSize",
@@ -66,12 +68,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, beforeInvocation = true),
+            @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true, beforeInvocation = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#task.id", beforeInvocation = true)
     })
     public Task updateTask(Task task) {
         Task fromDb = findById(task.getId());
         BeanUtils.copyNonNullValues(task, fromDb);
+        publishingService.publish(fromDb);
         return taskRepository.save(fromDb);
     }
 
