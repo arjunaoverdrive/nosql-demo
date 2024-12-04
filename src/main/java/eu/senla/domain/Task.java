@@ -20,6 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,6 +28,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,7 +48,9 @@ public class Task implements Serializable {
     @UpdateTimestamp
     Instant updatedAt;
     @Enumerated(EnumType.STRING)
-    TaskStatus status;
+    @ColumnDefault(value = "TODO")
+    @Builder.Default
+    TaskStatus status = TaskStatus.TODO;
     @ManyToOne
     @JoinColumn(name = "author_id")
     User author;

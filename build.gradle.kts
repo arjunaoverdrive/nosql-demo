@@ -7,7 +7,7 @@ group = "eu.senla"
 version = "0.0.1-SNAPSHOT"
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 configurations {
@@ -23,6 +23,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4")
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("io.lettuce:lettuce-core")
