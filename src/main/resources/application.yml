@@ -4,13 +4,6 @@ spring:
   profiles:
     active:
       - dev
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/no_sql_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      auto-commit: false
   jpa:
     hibernate:
       ddl-auto: 'validate'
@@ -23,6 +16,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/nosqldb?authSource=admin
 
 server:
   port: 8080

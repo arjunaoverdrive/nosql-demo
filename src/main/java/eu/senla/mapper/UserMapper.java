@@ -20,7 +20,7 @@ public interface UserMapper {
                 .build();
     }
     User toUser(UserRequest request);
-    default User toUser(Long id, UserRequest request) {
+    default User toUser(String id, UserRequest request) {
         User user = toUser(request);
         user.setId(id);
         return user;

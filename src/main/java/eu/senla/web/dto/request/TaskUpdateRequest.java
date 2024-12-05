@@ -13,5 +13,5 @@ public class TaskUpdateRequest {
     @Size(max = 1204)
     String description;
     TaskStatus status;
-    Long assigneeId;
+    String assigneeId;
 }

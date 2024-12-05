@@ -25,13 +25,15 @@ public interface TaskMapper {
     }
     Task toTask(TaskSubmitRequest request);
     Task toTask(TaskUpdateRequest request);
-    default Task toTask(Long id, TaskUpdateRequest request) {
+
+    default Task toTask(String id, TaskUpdateRequest request) {
         Task task = toTask(request);
         task.setId(id);
         return task;
     }
     Task toTask(AddObserversRequest request);
-    default Task toTask(Long id, AddObserversRequest request) {
+
+    default Task toTask(String id, AddObserversRequest request) {
         Task task = toTask(request);
         task.setId(id);
         return task;

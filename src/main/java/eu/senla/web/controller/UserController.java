@@ -32,7 +32,7 @@ public class UserController {
         return ResponseEntity.ok().body(users);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
         UserResponse user = userMapper.toUserResponse(userService.findById(id));
         return ResponseEntity.ok().body(user);
     }
@@ -42,12 +42,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable String id, @RequestBody UserRequest request) {
         UserResponse user = userMapper.toUserResponse(userService.updateUser(userMapper.toUser(id, request)));
         return ResponseEntity.ok().body(user);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.deleteUserById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }

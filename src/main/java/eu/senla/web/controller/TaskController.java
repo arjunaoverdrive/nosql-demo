@@ -40,7 +40,7 @@ public class TaskController {
         return ResponseEntity.ok().body(tasks);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable String id) {
         TaskResponse taskResponse = taskMapper.toTaskResponse(taskService.findById(id));
         return ResponseEntity.ok().body(taskResponse);
     }
@@ -50,18 +50,18 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(taskResponse);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponse> updateTaskById(@PathVariable Long id, @Valid @RequestBody TaskUpdateRequest request) {
+    public ResponseEntity<TaskResponse> updateTaskById(@PathVariable String id, @Valid @RequestBody TaskUpdateRequest request) {
         Task task = taskService.updateTask(taskMapper.toTask(id, request));
         TaskResponse taskResponse = taskMapper.toTaskResponse(task);
         return ResponseEntity.ok().body(taskResponse);
     }
     @PatchMapping("/{id}/observers")
-    public ResponseEntity<TaskResponse> addObserversToTask(@PathVariable Long id, @Valid @RequestBody AddObserversRequest request) {
+    public ResponseEntity<TaskResponse> addObserversToTask(@PathVariable String id, @Valid @RequestBody AddObserversRequest request) {
         TaskResponse response = taskMapper.toTaskResponse(taskService.addObservers(id, request.getObserverIds()));
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable String id) {
         taskService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }

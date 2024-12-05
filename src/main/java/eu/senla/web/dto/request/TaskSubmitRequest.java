@@ -13,14 +13,15 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class TaskSubmitRequest {
+
     @NotEmpty
-    Long authorId;
+    String authorId;
     @NotEmpty
     @Size(min = 3, max = 32)
     String name;
     @Size(max = 1024)
     String description;
-    Long assigneeId;
+    String assigneeId;
     @Builder.Default
-    Set<Long> observerIds = new HashSet<>();
+    Set<String> observerIds = new HashSet<>();
 }

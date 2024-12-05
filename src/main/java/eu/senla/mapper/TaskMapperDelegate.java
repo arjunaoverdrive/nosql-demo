@@ -41,7 +41,7 @@ public abstract class TaskMapperDelegate implements TaskMapper {
     }
     @Override
     public Task toTask(AddObserversRequest request) {
-        List<Long> observerIds = request.getObserverIds();
+        List<String> observerIds = request.getObserverIds();
         Set<User> observers = new HashSet<>(userService.findAllByIds(observerIds));
         return Task.builder()
                 .observers(observers).build();

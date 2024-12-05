@@ -1,12 +1,10 @@
 package eu.senla.dao;
 
 import eu.senla.domain.Task;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
-    @EntityGraph(attributePaths = {"author", "assignee", "observers"})
+public interface TaskRepository extends MongoRepository<Task, String> {
     Optional<Task> findById(Long id);
 }

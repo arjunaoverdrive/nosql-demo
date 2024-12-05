@@ -10,5 +10,5 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddObserversRequest {
     @NotEmpty
-    List<Long> observerIds;
+    List<String> observerIds;
 }

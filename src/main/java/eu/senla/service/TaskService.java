@@ -6,9 +6,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 public interface TaskService {
     List<Task> findAll(Pageable pageable);
-    Task findById(Long id);
+    Task findById(String id);
     Task save(Task task);
-    void deleteById(Long id);
+    void deleteById(String id);
     Task updateTask(Task task);
-    Task addObservers(Long id, List<Long> observerIds);
+    Task addObservers(String id, List<String> observerIds);
 }

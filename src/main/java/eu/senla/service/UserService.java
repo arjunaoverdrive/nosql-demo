@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 public interface UserService {
     List<User> findAllUsers(Pageable pageable);
-    List<User> findAllByIds(Collection<Long> ids);
-    User findById(Long id);
+    List<User> findAllByIds(Collection<String> ids);
+    User findById(String id);
     User createUser(User user);
     User updateUser(User user);
-    void deleteUserById(Long id);
+    void deleteUserById(String id);
 }

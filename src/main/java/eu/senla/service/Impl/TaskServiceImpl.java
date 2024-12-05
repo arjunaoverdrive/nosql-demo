@@ -9,7 +9,6 @@ import eu.senla.service.PublishingService;
 import eu.senla.service.TaskService;
 import eu.senla.service.UserService;
 import eu.senla.utils.BeanUtils;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", unless = "#result == null")
-    public Task findById(Long id) {
+    public Task findById(String id) {
         return taskRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(
                         MessageFormat.format("Task with ID {0} not found", id)
@@ -60,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", beforeInvocation = true, cacheResolver = "customCacheResolver")
     })
-    public void deleteById(Long id) {
+    public void deleteById(String  id) {
         Task toDelete = findById(id);
         toDelete.getObservers().forEach(u -> u.removeObservedTask(toDelete));
         taskRepository.delete(toDelete);
@@ -79,12 +78,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    @Transactional
     @Caching(evict = {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", beforeInvocation = true)
     })
-    public Task addObservers(Long id, List<Long> observerIds) {
+    public Task addObservers(String id, List<String> observerIds) {
         List<User> allByIds = userService.findAllByIds(observerIds);
         Task task = findById(id);
         allByIds.forEach(u -> u.addObservedTasks(task));

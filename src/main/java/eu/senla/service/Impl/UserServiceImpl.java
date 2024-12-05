@@ -35,13 +35,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllByIds(Collection<Long> ids) {
+    public List<User> findAllByIds(Collection<String> ids) {
         return userRepository.findAllById(ids);
     }
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.USER_BY_ID, key = "#id", unless = "#result == null")
-    public User findById(Long id) {
+    public User findById(String id) {
         return userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(
                         MessageFormat.format("User with ID {0} not found", id)
@@ -69,7 +69,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(Long id) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.ALL_USERS, allEntries = true),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.USER_BY_ID, key = "#id")
+    })
+    public void deleteUserById(String id) {
         User toDelete = findById(id);
         userRepository.delete(toDelete);
     }

@@ -25,10 +25,10 @@ public class OpenApiConfiguration {
                 .url("https://chooselicense.com/licenses/agpl-3.0");
 
         Info info = new Info()
-                .title("BookInn API")
+                .title("ToDo API")
                 .version("1.0")
                 .contact(contact)
-                .description("API for the Book Inn app")
+                .description("API for the ToDo app")
                 .license(mitLicense);
 
         return new OpenAPI()
