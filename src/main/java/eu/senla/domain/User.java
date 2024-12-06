@@ -47,13 +47,11 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-//    @JsonBackReference
     Set<Task> createdTasks = new HashSet<>();
 
     @OneToMany(mappedBy = "assignee", cascade = CascadeType.MERGE)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-//    @JsonBackReference
     Set<Task> assignedTasks = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -64,7 +62,6 @@ public class User implements Serializable {
             joinColumns = @JoinColumn(name = "observer_id"),
             inverseJoinColumns = @JoinColumn(name = "task_id")
     )
-//    @JsonIgnore
     Set<Task> observedTasks = new HashSet<>();
 
     public void addCreatedTask(Task task) {
