@@ -37,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
     @PostMapping
-    public ResponseEntity<UserResponse> createuser(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
         UserResponse user = userMapper.toUserResponse(userService.createUser(userMapper.toUser(request)));
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }

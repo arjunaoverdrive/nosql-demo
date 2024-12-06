@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -27,13 +28,13 @@ public class User implements Serializable {
     String password;
     boolean isEnabled;
 
-    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }")
+    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }", lazy = false)
     Set<Task> createdTasks = new HashSet<>();
 
-    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }")
+    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }", lazy = false)
     Set<Task> assignedTasks = new HashSet<>();
 
-    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }")
+    @DocumentReference(collection = "tasks", lookup = "{'task':?#{#self._id} }", lazy = false)
     Set<Task> observedTasks = new HashSet<>();
 
     public void addCreatedTask(Task task) {

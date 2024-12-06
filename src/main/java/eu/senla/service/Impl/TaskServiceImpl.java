@@ -9,6 +9,7 @@ import eu.senla.service.PublishingService;
 import eu.senla.service.TaskService;
 import eu.senla.service.UserService;
 import eu.senla.utils.BeanUtils;
+import eu.senla.web.dto.response.TaskResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,12 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -30,6 +37,7 @@ public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
     UserService userService;
     PublishingService publishingService;
+    MongoTemplate mongoTemplate;
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, key = "#pageable.pageNumber + '_' + #pageable.pageSize",
@@ -48,6 +56,23 @@ public class TaskServiceImpl implements TaskService {
         );
     }
 
+    public List<TaskResponse> findTaskById(String id) {
+        LookupOperation lookupOperation = LookupOperation.newLookup()
+                .from("users")
+                .localField("author.id")
+                .foreignField("_id")
+                .as("authorDetails");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("id").is(id)),
+                lookupOperation
+        );
+
+        AggregationResults<TaskResponse> results = mongoTemplate.aggregate(aggregation, Task.class,
+                TaskResponse.class);
+        return results.getMappedResults();
+    }
+
     @Override
     @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true)
     public Task save(Task task) {
@@ -59,7 +84,7 @@ public class TaskServiceImpl implements TaskService {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", beforeInvocation = true, cacheResolver = "customCacheResolver")
     })
-    public void deleteById(String  id) {
+    public void deleteById(String id) {
         Task toDelete = findById(id);
         toDelete.getObservers().forEach(u -> u.removeObservedTask(toDelete));
         taskRepository.delete(toDelete);

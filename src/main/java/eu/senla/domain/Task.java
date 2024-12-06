@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -28,7 +30,9 @@ public class Task implements Serializable {
     String id;
     String name;
     String description;
+    @CreatedDate
     Instant createdAt;
+    @LastModifiedDate
     Instant updatedAt;
     @Builder.Default
     TaskStatus status = TaskStatus.TODO;
@@ -36,5 +40,6 @@ public class Task implements Serializable {
     User assignee;
 
     @DocumentReference(collection = "users", lookup = "{'user':?#{#self._id} }")
+    @Builder.Default
     Set<User> observers = new HashSet<>();
 }

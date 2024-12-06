@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/tasks")
 @RequiredArgsConstructor
@@ -42,6 +45,12 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable String id) {
         TaskResponse taskResponse = taskMapper.toTaskResponse(taskService.findById(id));
+        return ResponseEntity.ok().body(taskResponse);
+    }
+
+    @GetMapping("/{id}/aggregate")
+    public ResponseEntity<List<TaskResponse>> getById(@PathVariable String id) {
+        List<TaskResponse> taskResponse = taskService.findTaskById(id);
         return ResponseEntity.ok().body(taskResponse);
     }
     @PostMapping
