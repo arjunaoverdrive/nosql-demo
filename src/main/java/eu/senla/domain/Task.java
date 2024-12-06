@@ -56,18 +56,15 @@ public class Task implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-//    @JsonManagedReference
     User author;
 
     @ManyToOne
     @JoinColumn(name = "assignee_id")
-//    @JsonManagedReference
     User assignee;
 
     @ManyToMany(mappedBy = "observedTasks", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @Builder.Default
-//    @JsonBackReference
     Set<User> observers = new HashSet<>();
 }
