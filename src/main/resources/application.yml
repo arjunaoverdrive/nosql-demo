@@ -43,3 +43,9 @@ app:
 
   pubsub:
     topic: "nosql:pubsub"
+
+springdoc:
+  version: 2.5.0
+
+  swagger-ui:
+    path: /swagger-ui.html

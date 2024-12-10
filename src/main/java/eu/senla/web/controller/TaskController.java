@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -36,42 +38,50 @@ import java.util.List;
 public class TaskController {
     TaskService taskService;
     TaskMapper taskMapper;
+
     @GetMapping
-    public ResponseEntity<TaskListResponse> getAllTasks(
-            @PageableDefault(size = 10, page = 0, direction = Sort.Direction.ASC, sort = "id") Pageable pageable) {
-        TaskListResponse tasks = taskMapper.toListResponse(taskService.findAll(pageable));
-        return ResponseEntity.ok().body(tasks);
-    }
-    @GetMapping("/{id}")
-    public ResponseEntity<TaskResponse> getTaskById(@PathVariable String id) {
-        TaskResponse taskResponse = taskMapper.toTaskResponse(taskService.findById(id));
-        return ResponseEntity.ok().body(taskResponse);
+    public Flux<TaskResponse> getAllTasks() {
+        Flux<Task> tasks = taskService.findAll();
+        return tasks.map(taskMapper::toTaskResponse);
     }
 
-    @GetMapping("/{id}/aggregate")
-    public ResponseEntity<List<TaskResponse>> getById(@PathVariable String id) {
-        List<TaskResponse> taskResponse = taskService.findTaskById(id);
-        return ResponseEntity.ok().body(taskResponse);
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<TaskResponse>> getTaskById(@PathVariable String id) {
+        return taskService.findById(id)
+                .map(taskMapper::toTaskResponse)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskSubmitRequest request) {
-        TaskResponse taskResponse = taskMapper.toTaskResponse(taskService.save(taskMapper.toTask(request)));
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskResponse);
+    public Mono<ResponseEntity<TaskResponse>> createTask(@RequestBody TaskSubmitRequest request) {
+        Task task = taskMapper.toTask(request);
+        return taskService.save(task)
+                .map(taskMapper::toTaskResponse)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponse> updateTaskById(@PathVariable String id, @Valid @RequestBody TaskUpdateRequest request) {
-        Task task = taskService.updateTask(taskMapper.toTask(id, request));
-        TaskResponse taskResponse = taskMapper.toTaskResponse(task);
-        return ResponseEntity.ok().body(taskResponse);
+    public Mono<ResponseEntity<TaskResponse>> updateTaskById(@PathVariable String id, @Valid @RequestBody TaskUpdateRequest request) {
+       Task task = taskMapper.toTask(id, request);
+       return taskService.updateTask(task)
+               .map(taskMapper::toTaskResponse)
+               .map(ResponseEntity::ok)
+               .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @PatchMapping("/{id}/observers")
-    public ResponseEntity<TaskResponse> addObserversToTask(@PathVariable String id, @Valid @RequestBody AddObserversRequest request) {
-        TaskResponse response = taskMapper.toTaskResponse(taskService.addObservers(id, request.getObserverIds()));
-        return ResponseEntity.ok().body(response);
+    public Mono<ResponseEntity<TaskResponse>> addObserversToTask(@PathVariable String id, @Valid @RequestBody AddObserversRequest request) {
+        Task task = taskMapper.toTask(id, request);
+        return taskService.updateTask(task)
+                .map(taskMapper::toTaskResponse)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable String id) {
-        taskService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    public Mono<Void> deleteTask(@PathVariable String id) {
+        return taskService.deleteById(id);
     }
 }

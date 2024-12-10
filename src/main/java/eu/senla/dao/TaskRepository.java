@@ -1,10 +1,7 @@
 package eu.senla.dao;
 
 import eu.senla.domain.Task;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 
-import java.util.Optional;
-
-public interface TaskRepository extends MongoRepository<Task, String> {
-    Optional<Task> findById(Long id);
+public interface TaskRepository extends ReactiveMongoRepository<Task, String> {
 }

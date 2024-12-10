@@ -10,9 +10,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -24,7 +24,7 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-@Document(collection = "tasks")
+@Document(collection = "tasks_react")
 public class Task implements Serializable {
 
     @Id
@@ -38,10 +38,16 @@ public class Task implements Serializable {
     Instant updatedAt;
     @Builder.Default
     TaskStatus status = TaskStatus.TODO;
-    User author;
-    User assignee;
+    String authorId;
+    String assigneeId;
+    Set<String> observerIds = new HashSet<>();
 
-    @DocumentReference(collection = "users", lookup = "{'user':?#{#self._id} }")
-    @Builder.Default
+    @ReadOnlyProperty
+    private User author;
+
+    @ReadOnlyProperty
+    private User assignee;
+
+    @ReadOnlyProperty
     Set<User> observers = new HashSet<>();
 }

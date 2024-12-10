@@ -3,13 +3,12 @@ package eu.senla.service.Impl;
 import eu.senla.config.properties.AppCacheProperties;
 import eu.senla.dao.TaskRepository;
 import eu.senla.domain.Task;
+import eu.senla.domain.TaskStatus;
 import eu.senla.domain.User;
-import eu.senla.exception.NotFoundException;
 import eu.senla.service.PublishingService;
 import eu.senla.service.TaskService;
 import eu.senla.service.UserService;
 import eu.senla.utils.BeanUtils;
-import eu.senla.web.dto.response.TaskResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,66 +16,53 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.LookupOperation;
-import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.text.MessageFormat;
-import java.util.List;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @CacheConfig(cacheManager = "redisCacheManager")
 public class TaskServiceImpl implements TaskService {
+
     TaskRepository taskRepository;
     UserService userService;
     PublishingService publishingService;
-    MongoTemplate mongoTemplate;
+
 
     @Override
-    @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, key = "#pageable.pageNumber + '_' + #pageable.pageSize",
-            unless = "#result == null || #result.isEmpty()")
-    public List<Task> findAll(Pageable pageable) {
-        return taskRepository.findAll(pageable).getContent();
+    @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, unless = "#result == null || #result.isEmpty()")
+    public Flux<Task> findAll() {
+        Flux<Task> tasks = taskRepository.findAll();
+        return tasks.flatMap(task -> {
+            Mono<Task> taskMono = Mono.just(task);
+            return zipTaskMonoWithUserMonos(taskMono);
+        });
     }
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", unless = "#result == null")
-    public Task findById(String id) {
-        return taskRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(
-                        MessageFormat.format("Task with ID {0} not found", id)
-                )
-        );
-    }
-
-    public List<TaskResponse> findTaskById(String id) {
-        LookupOperation lookupOperation = LookupOperation.newLookup()
-                .from("users")
-                .localField("author.id")
-                .foreignField("_id")
-                .as("authorDetails");
-
-        Aggregation aggregation = Aggregation.newAggregation(
-                Aggregation.match(Criteria.where("id").is(id)),
-                lookupOperation
-        );
-
-        AggregationResults<TaskResponse> results = mongoTemplate.aggregate(aggregation, Task.class,
-                TaskResponse.class);
-        return results.getMappedResults();
+    public Mono<Task> findById(String id) {
+        Mono<Task> task = taskRepository.findById(id);
+        return zipTaskMonoWithUserMonos(task);
     }
 
     @Override
     @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true)
-    public Task save(Task task) {
-        return taskRepository.save(task);
+    public Mono<Task> save(Task task) {
+        task.setAssigneeId(task.getAssigneeId() == null ? task.getAuthorId() : task.getAssigneeId());
+        task.setCreatedAt(Instant.now());
+        task.setUpdatedAt(Instant.now());
+        task.setStatus(TaskStatus.TODO);
+
+        Mono<Task> taskMono = Mono.just(task);
+
+        return zipTaskMonoWithUserMonos(taskMono).flatMap(taskRepository::save);
     }
 
     @Override
@@ -84,10 +70,8 @@ public class TaskServiceImpl implements TaskService {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", beforeInvocation = true, cacheResolver = "customCacheResolver")
     })
-    public void deleteById(String id) {
-        Task toDelete = findById(id);
-        toDelete.getObservers().forEach(u -> u.removeObservedTask(toDelete));
-        taskRepository.delete(toDelete);
+    public Mono<Void> deleteById(String id) {
+        return taskRepository.deleteById(id);
     }
 
     @Override
@@ -95,11 +79,13 @@ public class TaskServiceImpl implements TaskService {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true, beforeInvocation = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#task.id", beforeInvocation = true)
     })
-    public Task updateTask(Task task) {
-        Task fromDb = findById(task.getId());
-        BeanUtils.copyNonNullValues(task, fromDb);
-        publishingService.publish(fromDb);
-        return taskRepository.save(fromDb);
+    public Mono<Task> updateTask(Task task) {
+        Mono<Task> taskMono = findById(task.getId()).map(fromDb -> {
+            BeanUtils.copyNonNullValues(task, fromDb);
+            publishingService.publish(task);
+            return fromDb;
+        });
+        return zipTaskMonoWithUserMonos(taskMono).flatMap(taskRepository::save);
     }
 
     @Override
@@ -107,10 +93,29 @@ public class TaskServiceImpl implements TaskService {
             @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#id", beforeInvocation = true)
     })
-    public Task addObservers(String id, List<String> observerIds) {
-        List<User> allByIds = userService.findAllByIds(observerIds);
-        Task task = findById(id);
-        allByIds.forEach(u -> u.addObservedTasks(task));
-        return taskRepository.save(task);
+    public Mono<Task> addObservers(String id, Set<String> observerIds) {
+        Mono<Task> task = findById(id).map(t -> {
+            t.setObserverIds(observerIds);
+            return t;
+        });
+        return zipTaskMonoWithUserMonos(task).flatMap(taskRepository::save);
+    }
+
+    private Mono<Task> zipTaskMonoWithUserMonos(Mono<Task> taskMono) {
+        Mono<User> authorMono = taskMono.map(Task::getAuthorId)
+                .flatMap(userService::findById);
+        Mono<User> assigneeMono = taskMono.map(Task::getAssigneeId)
+                .flatMap(userService::findById);
+        Mono<Set<User>> observersMono = taskMono.map(Task::getObserverIds)
+                .flatMap(userService::findAllByIds);
+
+        return Mono.zip(taskMono, authorMono, assigneeMono, observersMono)
+                .flatMap(data -> {
+                    Task t1 = data.getT1();
+                    t1.setAuthor(data.getT2());
+                    t1.setAssignee(data.getT3());
+                    t1.setObservers(data.getT4());
+                    return Mono.just(t1);
+                });
     }
 }

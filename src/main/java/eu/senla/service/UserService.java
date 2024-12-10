@@ -1,15 +1,22 @@
 package eu.senla.service;
 
 import eu.senla.domain.User;
-import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+
 public interface UserService {
-    List<User> findAllUsers(Pageable pageable);
-    List<User> findAllByIds(Collection<String> ids);
-    User findById(String id);
-    User createUser(User user);
-    User updateUser(User user);
-    void deleteUserById(String id);
+    Flux<User> findAllUsers();
+
+    Mono<Set<User>> findAllByIds(Collection<String> ids);
+
+    Mono<User> findById(String id);
+
+    Mono<User> createUser(User user);
+
+    Mono<User> updateUser(User user);
+
+    Mono<Void> deleteUserById(String id);
 }
