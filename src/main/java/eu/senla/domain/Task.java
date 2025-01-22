@@ -40,6 +40,7 @@ public class Task implements Serializable {
     TaskStatus status = TaskStatus.TODO;
     String authorId;
     String assigneeId;
+    @Builder.Default
     Set<String> observerIds = new HashSet<>();
 
     @ReadOnlyProperty
@@ -49,5 +50,6 @@ public class Task implements Serializable {
     private User assignee;
 
     @ReadOnlyProperty
+    @Builder.Default
     Set<User> observers = new HashSet<>();
 }

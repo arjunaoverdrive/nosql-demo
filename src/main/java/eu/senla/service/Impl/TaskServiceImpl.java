@@ -21,7 +21,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -36,9 +35,9 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, unless = "#result == null || #result.isEmpty()")
-    public Flux<Task> findAll() {
-        Flux<Task> tasks = taskRepository.findAll();
+    @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_TASKS, key = "'all'", unless = "#result == null || #result.isEmpty()")
+    public Flux<Task> findAll(Integer pageSize, Integer page) {
+        Flux<Task> tasks = taskRepository.findAll().skip(page).take(pageSize);
         return tasks.flatMap(task -> {
             Mono<Task> taskMono = Mono.just(task);
             return zipTaskMonoWithUserMonos(taskMono);

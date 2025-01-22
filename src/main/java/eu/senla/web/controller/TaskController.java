@@ -6,16 +6,11 @@ import eu.senla.service.TaskService;
 import eu.senla.web.dto.request.AddObserversRequest;
 import eu.senla.web.dto.request.TaskSubmitRequest;
 import eu.senla.web.dto.request.TaskUpdateRequest;
-import eu.senla.web.dto.response.TaskListResponse;
 import eu.senla.web.dto.response.TaskResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +20,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/tasks")
@@ -40,8 +35,9 @@ public class TaskController {
     TaskMapper taskMapper;
 
     @GetMapping
-    public Flux<TaskResponse> getAllTasks() {
-        Flux<Task> tasks = taskService.findAll();
+    public Flux<TaskResponse> getAllTasks(@RequestParam(defaultValue = "10") Integer pageSize,
+                                          @RequestParam(defaultValue = "0") Integer page) {
+        Flux<Task> tasks = taskService.findAll(pageSize, page);
         return tasks.map(taskMapper::toTaskResponse);
     }
 
