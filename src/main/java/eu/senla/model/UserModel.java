@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserModel {
 
-    Long id;
+    String id;
     String username;
     String email;
     boolean isEnabled;

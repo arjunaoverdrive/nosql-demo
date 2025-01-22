@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 public class TaskModel {
 
-    Long id;
+    String id;
     String name;
     String description;
     TaskStatus status;
