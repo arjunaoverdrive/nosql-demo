@@ -30,7 +30,7 @@ public class CacheConfiguration {
         appCacheProperties.getCacheNames().forEach(cacheName -> {
             redisCacheConfigurationMap.put(
                     cacheName,
-                    RedisCacheConfiguration.defaultCacheConfig().entryTtl(
+                    defaultConfig.entryTtl(
                             appCacheProperties.getCaches().get(cacheName).getExpiry()
                     )
             );
