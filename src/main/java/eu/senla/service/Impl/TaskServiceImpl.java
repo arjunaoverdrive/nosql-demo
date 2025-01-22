@@ -16,6 +16,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, beforeInvocation = true),
+            @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, beforeInvocation = true, allEntries = true),
             @CacheEvict(value = AppCacheProperties.CacheNames.TASK_BY_ID, key = "#task.id", beforeInvocation = true)
     })
     public Task updateTask(Task task) {

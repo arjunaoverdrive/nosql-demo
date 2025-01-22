@@ -1,6 +1,8 @@
 package eu.senla.config.properties;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -17,8 +19,10 @@ public class AppCacheProperties {
     private Map<String, CacheProperties> caches = new HashMap<>();
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class CacheProperties {
-        private Duration expiry = Duration.ZERO;
+        private Duration expiry;
     }
 
     public interface CacheNames{
