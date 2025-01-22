@@ -13,6 +13,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class CacheConfiguration {
         appCacheProperties.getCacheNames().forEach(cacheName -> {
             redisCacheConfigurationMap.put(
                     cacheName,
-                    RedisCacheConfiguration.defaultCacheConfig().entryTtl(
+                    defaultConfig.entryTtl(
                             appCacheProperties.getCaches().get(cacheName).getExpiry()
                     )
             );
