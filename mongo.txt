@@ -1,0 +1,35 @@
+mongosh -u root -p root --authenticationDatabase admin
+
+show dbs
+
+use nosqldb
+
+show collections
+
+use users
+ ------------------
+
+ db.users.find()
+
+ db.users.find({}, {'username' : 1, 'email' : 1})
+
+ db.users.find({'username' : 'test'})
+
+ db.users.insertOne({
+  'username': 'new user',
+  'email': 'newuser@gmail.com',
+  'password': '123dsa'
+})
+
+var user = db.users.findOne({'username' : 'new user'})
+user.username = 'test user'
+db.users.replaceOne({'username' : 'new user', user})
+
+db.users.updateOne({'username': 'test user'}, {'$set' : {'isEnabled': true}})
+
+
+db.users.deleteOne( {'username' : 'test user' })
+
+
+user = db.users.findOne({'username' : 'new user'})
+db.users.replaceOne({'username' : 'test user', user})
