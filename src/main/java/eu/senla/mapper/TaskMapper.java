@@ -12,6 +12,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
+import java.util.Set;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = UserMapper.class)
 @DecoratedWith(TaskMapperDelegate.class)
 public interface TaskMapper {
@@ -23,6 +25,15 @@ public interface TaskMapper {
                         .toList())
                 .build();
     }
+
+    default TaskListResponse toListResponse(Set<Task> tasks) {
+        return TaskListResponse.builder()
+                .tasks(tasks.stream()
+                        .map(this::toTaskResponse)
+                        .toList())
+                .build();
+    }
+
     Task toTask(TaskSubmitRequest request);
     Task toTask(TaskUpdateRequest request);
 

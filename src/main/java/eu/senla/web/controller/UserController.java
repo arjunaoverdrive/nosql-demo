@@ -5,9 +5,11 @@ import eu.senla.service.UserService;
 import eu.senla.web.dto.request.UserRequest;
 import eu.senla.web.dto.response.UserListResponse;
 import eu.senla.web.dto.response.UserResponse;
+import eu.senla.web.dto.response.UserWithTasksResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class UserController {
     UserService userService;
     UserMapper userMapper;
     @GetMapping
-    public ResponseEntity<UserListResponse> getAllUsers(Pageable pageable) {
+    public ResponseEntity<UserListResponse> getAllUsers(@ParameterObject Pageable pageable) {
         UserListResponse users = userMapper.toListResponse(userService.findAllUsers(pageable));
         return ResponseEntity.ok().body(users);
     }
@@ -35,6 +38,24 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
         UserResponse user = userMapper.toUserResponse(userService.findById(id));
         return ResponseEntity.ok().body(user);
+    }
+
+    @GetMapping("/{id}/tasks/created")
+    public ResponseEntity<UserWithTasksResponse> getUserByIdWithTasks(@PathVariable String id) {
+        UserWithTasksResponse users = userMapper.toUserWithTasks(userService.findUserWithTasksAsAuthor(id));
+        return ResponseEntity.ok().body(users);
+    }
+
+    @GetMapping("/{id}/tasks/assigned")
+    public ResponseEntity<UserWithTasksResponse> getUserByIdWithTasksAsAssignee(@PathVariable String id) {
+        UserWithTasksResponse users = userMapper.toUserWithTasks(userService.findUserWithTasksAsAssignee(id));
+        return ResponseEntity.ok().body(users);
+    }
+
+    @GetMapping("/{id}/tasks/observed")
+    public ResponseEntity<UserWithTasksResponse> getUserByIdWithTasksAsObserver(@PathVariable String id) {
+        UserWithTasksResponse users = userMapper.toUserWithTasks(userService.findUserWithTasksAsObserver(id));
+        return ResponseEntity.ok().body(users);
     }
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {

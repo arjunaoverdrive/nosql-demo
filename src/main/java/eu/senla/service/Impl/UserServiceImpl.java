@@ -2,11 +2,13 @@ package eu.senla.service.Impl;
 
 import eu.senla.config.properties.AppCacheProperties;
 import eu.senla.dao.UserRepository;
+import eu.senla.domain.Task;
 import eu.senla.domain.User;
 import eu.senla.exception.NotFoundException;
+import eu.senla.mapper.UserMapper;
+import eu.senla.model.UserWithTasksModel;
 import eu.senla.service.UserService;
 import eu.senla.utils.BeanUtils;
-import eu.senla.web.dto.response.UserResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,18 +16,15 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.LookupOperation;
-import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -35,6 +34,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
+    MongoTemplate mongoTemplate;
+    UserMapper mapper;
 
     @Override
     @Cacheable(cacheNames = AppCacheProperties.CacheNames.ALL_USERS,
@@ -56,6 +57,61 @@ public class UserServiceImpl implements UserService {
                         MessageFormat.format("User with ID {0} not found", id)
                 )
         );
+    }
+
+    @Override
+    public UserWithTasksModel findUserWithTasksAsAuthor(String id) {
+
+        User user = mongoTemplate.findById(id, User.class);
+        UserWithTasksModel userModel = mapper.toUserWithTasks(user);
+
+
+        if (user == null) {
+            return null;
+        }
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("author.id").is(id));
+
+        List<Task> tasks = mongoTemplate.find(query, Task.class);
+        userModel.setTasks(new HashSet<>(tasks));
+
+        return userModel;
+    }
+
+    @Override
+    public UserWithTasksModel findUserWithTasksAsAssignee(String id) {
+
+        User user = mongoTemplate.findById(id, User.class);
+        UserWithTasksModel userModel = mapper.toUserWithTasks(user);
+        if (user == null) {
+            return null;
+        }
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("assignee.id").is(id));
+        List<Task> tasks = mongoTemplate.find(query, Task.class);
+        userModel.setTasks(new HashSet<>(tasks));
+
+        return userModel;
+    }
+
+    @Override
+    public UserWithTasksModel findUserWithTasksAsObserver(String id) {
+
+        User user = mongoTemplate.findById(id, User.class);
+        UserWithTasksModel userModel = mapper.toUserWithTasks(user);
+
+        if (user == null) {
+            return null;
+        }
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("observers.id").is(id));
+        List<Task> tasks = mongoTemplate.find(query, Task.class);
+        userModel.setTasks(new HashSet<>(tasks));
+
+        return userModel;
     }
 
     @Override

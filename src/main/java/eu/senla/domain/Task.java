@@ -40,8 +40,6 @@ public class Task implements Serializable {
     TaskStatus status = TaskStatus.TODO;
     User author;
     User assignee;
-
-    @DocumentReference(collection = "users", lookup = "{'user':?#{#self._id} }")
     @Builder.Default
     Set<User> observers = new HashSet<>();
 }

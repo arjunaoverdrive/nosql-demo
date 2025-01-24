@@ -55,6 +55,7 @@ public class TaskServiceImpl implements TaskService {
         );
     }
 
+    @Override
     public List<TaskResponse> findTaskById(String id) {
         LookupOperation lookupOperation = LookupOperation.newLookup()
                 .from("users")
@@ -72,6 +73,10 @@ public class TaskServiceImpl implements TaskService {
         return results.getMappedResults();
     }
 
+    public List<Task> findTasksByAuthor(User author) {
+        return taskRepository.findByAuthor(author);
+    }
+
     @Override
     @CacheEvict(value = AppCacheProperties.CacheNames.ALL_TASKS, allEntries = true)
     public Task save(Task task) {
@@ -85,7 +90,6 @@ public class TaskServiceImpl implements TaskService {
     })
     public void deleteById(String id) {
         Task toDelete = findById(id);
-        toDelete.getObservers().forEach(u -> u.removeObservedTask(toDelete));
         taskRepository.delete(toDelete);
     }
 
@@ -109,7 +113,7 @@ public class TaskServiceImpl implements TaskService {
     public Task addObservers(String id, List<String> observerIds) {
         List<User> allByIds = userService.findAllByIds(observerIds);
         Task task = findById(id);
-        allByIds.forEach(u -> u.addObservedTasks(task));
+        task.getObservers().addAll(allByIds);
         return taskRepository.save(task);
     }
 }

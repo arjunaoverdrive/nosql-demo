@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -38,7 +39,7 @@ public class TaskController {
     TaskMapper taskMapper;
     @GetMapping
     public ResponseEntity<TaskListResponse> getAllTasks(
-            @PageableDefault(size = 10, page = 0, direction = Sort.Direction.ASC, sort = "id") Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         TaskListResponse tasks = taskMapper.toListResponse(taskService.findAll(pageable));
         return ResponseEntity.ok().body(tasks);
     }

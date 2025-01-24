@@ -23,13 +23,9 @@ use users
 
 var user = db.users.findOne({'username' : 'new user'})
 user.username = 'test user'
-db.users.replaceOne({'username' : 'new user', user})
+db.users.replaceOne({'username' : 'new user'}, user)
 
 db.users.updateOne({'username': 'test user'}, {'$set' : {'isEnabled': true}})
 
 
 db.users.deleteOne( {'username' : 'test user' })
-
-
-user = db.users.findOne({'username' : 'new user'})
-db.users.replaceOne({'username' : 'test user', user})
