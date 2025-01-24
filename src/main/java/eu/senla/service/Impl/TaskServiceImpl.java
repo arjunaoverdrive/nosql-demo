@@ -73,8 +73,9 @@ public class TaskServiceImpl implements TaskService {
         return results.getMappedResults();
     }
 
-    public List<Task> findTasksByAuthor(User author) {
-        return taskRepository.findByAuthor(author);
+    @Override
+    public List<Task> findTasksByUser(String id) {
+        return taskRepository.findByUser(id);
     }
 
     @Override

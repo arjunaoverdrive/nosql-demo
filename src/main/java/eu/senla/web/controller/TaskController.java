@@ -54,6 +54,12 @@ public class TaskController {
         List<TaskResponse> taskResponse = taskService.findTaskById(id);
         return ResponseEntity.ok().body(taskResponse);
     }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<TaskListResponse> getByUserId(@PathVariable String id) {
+        TaskListResponse taskResponse = taskMapper.toListResponse(taskService.findTasksByUser(id));
+        return ResponseEntity.ok().body(taskResponse);
+    }
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(@RequestBody TaskSubmitRequest request) {
         TaskResponse taskResponse = taskMapper.toTaskResponse(taskService.save(taskMapper.toTask(request)));
